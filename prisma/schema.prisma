@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  name     String
+  email    String @unique
+  password String
+
+  userWebinars UserWebinar[]
+}
+
+model Webinar {
+  id       Int      @id @default(autoincrement())
+  title    String
+  summary  String
+  datetime DateTime
+  language String
+
+  speakers     SpeakerWebinar[]
+  categories   CategoryWebinar[]
+  userWebinars UserWebinar[]
+}
+
+model Speaker {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  webinars SpeakerWebinar[]
+}
+
+model SpeakerWebinar {
+  idWebinar Int
+  idSpeaker Int
+
+  webinar Webinar @relation(fields: [idWebinar], references: [id])
+  speaker Speaker @relation(fields: [idSpeaker], references: [id])
+
+  @@id([idWebinar, idSpeaker])
+}
+
+model Category {
+  id          Int    @id @default(autoincrement())
+  description String
+
+  webinars CategoryWebinar[]
+}
+
+model CategoryWebinar {
+  idWebinar  Int
+  idCategory Int
+
+  webinar  Webinar  @relation(fields: [idWebinar], references: [id])
+  category Category @relation(fields: [idCategory], references: [id])
+
+  @@id([idWebinar, idCategory])
+}
+
+model UserWebinar {
+  id        Int    @id @default(autoincrement())
+  idWebinar Int
+  idUser    Int
+  name      String
+  email     String
+  linkedin  String
+
+  webinar Webinar @relation(fields: [idWebinar], references: [id])
+  user    User    @relation(fields: [idUser], references: [id])
+
+  // Regras de idempotência:
+  @@unique([idWebinar, idUser]) // mesmo user não pode se inscrever 2x
+  @@unique([idWebinar, email]) // mesmo email não pode inscrever 2x no mesmo webinar
+  @@unique([idWebinar, linkedin]) // mesmo LinkedIn não pode inscrever 2x no mesmo webinar
+}
