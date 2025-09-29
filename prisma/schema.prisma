@@ -29,6 +29,7 @@ model Webinar {
   summary  String
   datetime DateTime
   language String
+  duration Int
 
   speakers     SpeakerWebinar[]
   categories   CategoryWebinar[]
