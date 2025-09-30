@@ -4,10 +4,15 @@ import { Prisma } from '../../generated/prisma'
 
 export async function getWebinarList(req: Request, res: Response) {
     try {
-        const { userEnrolled } = req.query
-        const { userId } = req.user
+        const { userEnrolled, categories, speakers, languages, search } = req.query
         const userEnrolledBool = userEnrolled === 'true'
-        const webinarList = await webinarServices.getAllWebinar(userId, userEnrolledBool)
+        const { userId } = req.user
+        const categoriesParam = categories as string | string[]
+        const speakersParam = speakers as string | string[]
+        const languagesParam = languages as string | string[]
+        const searchParam = search as string
+
+        const webinarList = await webinarServices.getAllWebinar(userId, userEnrolledBool, categoriesParam, speakersParam, languagesParam, searchParam)
 
         if (!webinarList) return res.status(404).json({ message: "Not found!" })
         res.status(200).json(webinarList)
@@ -51,3 +56,4 @@ export async function enrollUserToWebinar(req: Request, res: Response) {
         res.status(500).json({ message: "Internal server error" })
     }
 }
+

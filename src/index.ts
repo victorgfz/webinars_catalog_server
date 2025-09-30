@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import authRouter from "./routes/auth.routes"
 import userRouter from "./routes/user.routes"
 import webinarRouter from "./routes/webinar.routes"
+import filterRouter from "./routes/filter.routes"
 
 const app = express();
 const port = 8080;
@@ -21,6 +22,7 @@ app.use(express.json());
 app.use("/auth", authRouter)
 app.use("/user", userRouter)
 app.use("/webinar", webinarRouter)
+app.use("/filter", filterRouter)
 
 
 

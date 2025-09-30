@@ -11,4 +11,5 @@ router.get("/", authenticate, getWebinarList)
 router.get("/:id", authenticate, getWebinarById)
 router.post("/:id/enrollment", authenticate, validateSchema(enrollmentSchema), checkIfExists.linkedinInUserWebinar, checkIfExists.emailInUserWebinar, enrollUserToWebinar)
 
+
 export default router;

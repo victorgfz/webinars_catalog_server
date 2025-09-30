@@ -1,37 +1,117 @@
 
-import { PrismaClient, Prisma, UserWebinar } from '../../generated/prisma'
+import { PrismaClient, Prisma } from '../../generated/prisma'
 
 const prisma = new PrismaClient()
 
 
-async function getAllWebinar(userId: number, userEnrolled: boolean) {
+async function getAllWebinar(
+    userId: number,
+    userEnrolled?: boolean,
+    categories?: string | string[],
+    speakers?: string | string[],
+    languages?: string | string[],
+    search?: string
+) {
     try {
+
+        const where: any = {
+            datetime: {
+                gte: new Date()
+            }
+        }
+
+        if (userEnrolled) {
+            where.userWebinars = {
+                some: {
+                    idUser: userId
+                }
+            }
+        }
+
+        if (categories) {
+            const categoriesArray = Array.isArray(categories) ? categories : [categories]
+            where.categories = {
+                some: {
+                    category: {
+                        description: {
+                            in: categoriesArray,
+                            mode: "insensitive"
+                        }
+                    }
+                }
+            }
+        }
+
+        if (speakers) {
+            const speakersArray = Array.isArray(speakers) ? speakers : [speakers]
+            where.speakers = {
+                some: {
+                    speaker: {
+                        name: {
+                            in: speakersArray,
+                            mode: "insensitive"
+                        }
+                    }
+                }
+            }
+        }
+
+        if (languages) {
+            const languagesArray = Array.isArray(languages) ? languages : [languages]
+            where.language = {
+                in: languagesArray,
+                mode: "insensitive"
+            }
+        }
+
+        if (search) {
+            where.OR = [
+                { title: { contains: search, mode: "insensitive" } },
+                { summary: { contains: search, mode: "insensitive" } },
+                { language: { contains: search, mode: "insensitive" } },
+                {
+                    categories: {
+                        some: {
+                            category: {
+                                description: { contains: search, mode: "insensitive" }
+                            }
+                        }
+                    }
+                },
+                {
+                    speakers: {
+                        some: {
+                            speaker: {
+                                name: { contains: search, mode: "insensitive" }
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+
         const webinarList = await prisma.webinar.findMany({
+            where,
             include: {
                 categories: {
                     include: {
                         category: {
-                            select: {
-                                description: true
-                            }
+                            select: { description: true }
                         }
-                    },
+                    }
                 },
                 speakers: {
                     include: {
                         speaker: {
-                            select: {
-                                name: true
-                            }
+                            select: { name: true }
                         }
-                    },
+                    }
                 },
                 userWebinars: true
             }
         })
 
-        if (!webinarList) return false
-        const formattedWebinarList = webinarList.map(item => ({
+        return webinarList.map(item => ({
             id: item.id,
             title: item.title,
             summary: item.summary,
@@ -40,37 +120,14 @@ async function getAllWebinar(userId: number, userEnrolled: boolean) {
             language: item.language,
             categories: item.categories.map(i => i.category.description),
             speakers: item.speakers.map(i => i.speaker.name),
-            userEnrolled: item.userWebinars.some(item => item.idUser === userId)
+            userEnrolled: item.userWebinars.some(u => u.idUser === userId)
         }))
-
-        const filteredPastWebinarList = filterPastWebinar(formattedWebinarList)
-
-
-        if (userEnrolled) {
-            const filteredWebinarList = filterUserWebinar(filteredPastWebinarList)
-            return filteredWebinarList
-        }
-
-        return filteredPastWebinarList
-
     } catch (error) {
         console.error("Service error: ", error)
         throw error
     }
 }
 
-function filterPastWebinar(webinars: { id: number, title: string, summary: string, duration: number, datetime: Date, language: string, categories: string[], speakers: string[], userEnrolled: boolean, }[]) {
-    if (!webinars) return []
-    const today = new Date()
-    const webinarList = webinars.filter(item => item.datetime.getTime() > today.getTime())
-    return webinarList
-}
-
-function filterUserWebinar(webinars: { id: number, title: string, summary: string, duration: number, datetime: Date, language: string, categories: string[], speakers: string[], userEnrolled: boolean, }[]) {
-    if (!webinars) return false
-    const webinarList = webinars.filter(item => item.userEnrolled)
-    return webinarList
-}
 
 async function getWebinar(webinarId: number, userId: number) {
     try {
@@ -137,6 +194,7 @@ async function enrollment(data: Prisma.UserWebinarCreateInput) {
         throw error
     }
 }
+
 
 
 export const webinarServices = {
