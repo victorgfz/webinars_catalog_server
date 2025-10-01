@@ -20,26 +20,16 @@ export async function loginUser(req: Request, res: Response) {
             return res.status(401).json({ message: "Invalid credentials" })
         }
 
-        const isProduction = process.env.NODE_ENV === 'production'
 
-        res.status(200).cookie("token", loginToken, {
-            httpOnly: true,
-            secure: isProduction,
-            sameSite: isProduction ? "none" : "strict",
-            maxAge: 1000 * 60 * 60 * 24
-        }).json({ message: "Login successful!" })
+        res.status(200).json({
+            message: "Login successful!",
+            token: loginToken
+        })
     } catch (error) {
         res.status(500).json({ message: "Internal server error" })
     }
 }
 
 export function logoutUser(req: Request, res: Response) {
-    const isProduction = process.env.NODE_ENV === 'production'
-
-    res.clearCookie('token', {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? "none" : "strict"
-    });
-    return res.status(200).json({ ok: true });
+    return res.status(200).json({ message: "Logout successful!" });
 }
