@@ -1,5 +1,5 @@
 
-import { PrismaClient } from '../../generated/prisma'
+import { PrismaClient, Prisma } from '../../generated/prisma'
 
 const prisma = new PrismaClient()
 
@@ -35,6 +35,53 @@ async function getFilterList() {
     }
 }
 
+async function addCategory(data: Prisma.CategoryCreateInput) {
+    try {
+        const category = await prisma.category.create({ data })
+        if (!category) return false
+        return category
+    } catch (error) {
+        console.error("Service error: ", error)
+        throw error
+    }
+}
+
+async function getAllCategories() {
+    try {
+        const categories = await prisma.category.findMany()
+        if (!categories) return false
+        return categories
+    } catch (error) {
+        console.error("Service error: ", error)
+        throw error
+    }
+}
+
+async function getAllSpeakers() {
+    try {
+        const speakers = await prisma.speaker.findMany()
+        if (!speakers) return false
+        return speakers
+    } catch (error) {
+        console.error("Service error: ", error)
+        throw error
+    }
+}
+
+async function addSpeaker(data: Prisma.SpeakerCreateInput) {
+    try {
+        const speaker = await prisma.speaker.create({ data })
+        if (!speaker) return false
+        return speaker
+    } catch (error) {
+        console.error("Service error: ", error)
+        throw error
+    }
+}
 export const filterServices = {
     getFilterList,
+    addCategory,
+    addSpeaker,
+    getAllCategories,
+    getAllSpeakers
 }

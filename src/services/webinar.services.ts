@@ -196,9 +196,51 @@ async function enrollment(data: Prisma.UserWebinarCreateInput) {
 }
 
 
+interface NewWebinarInput {
+    title: string;
+    summary: string;
+    datetime: Date;
+    duration: number;
+    language: string;
+    speakers: number[];
+    categories: number[];
+}
+
+async function addNewWebinar(data: NewWebinarInput) {
+    try {
+        const webinar = await prisma.webinar.create({
+            data: {
+                title: data.title,
+                summary: data.summary,
+                datetime: new Date(data.datetime),
+                duration: data.duration,
+                language: data.language,
+                speakers: {
+                    create: data.speakers.map(speakerId => ({
+                        speaker: { connect: { id: speakerId } }
+                    }))
+                },
+                categories: {
+                    create: data.categories.map(categoryId => ({
+                        category: { connect: { id: categoryId } }
+                    }))
+                }
+            }
+        })
+
+        if (!webinar) return false
+
+        return webinar;
+    } catch (error) {
+        console.error("Service error: ", error);
+        throw error;
+    }
+}
+
 
 export const webinarServices = {
     getAllWebinar,
     getWebinar,
-    enrollment
+    enrollment,
+    addNewWebinar
 }

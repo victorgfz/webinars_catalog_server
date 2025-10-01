@@ -31,3 +31,8 @@ export async function loginUser(req: Request, res: Response) {
     }
 
 }
+
+export function logoutUser(req: Request, res: Response) {
+    res.clearCookie('token', { httpOnly: true, secure: false, sameSite: "strict" });
+    return res.status(200).json({ ok: true });
+}

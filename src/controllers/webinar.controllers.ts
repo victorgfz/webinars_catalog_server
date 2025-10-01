@@ -57,3 +57,16 @@ export async function enrollUserToWebinar(req: Request, res: Response) {
     }
 }
 
+
+export async function addNewWebinar(req: Request, res: Response) {
+    try {
+        const webinar = await webinarServices.addNewWebinar(req.body)
+
+        if (!webinar) return res.status(400).json({ message: "Unexpected error occurred!" })
+
+        res.status(201).json({ message: "New webinar added successfully!", webinar })
+    } catch (error) {
+
+        res.status(500).json({ message: "Internal server error" })
+    }
+}
