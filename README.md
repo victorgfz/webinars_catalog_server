@@ -9,18 +9,17 @@ Run the commands below in a Git Bash terminal:
 
 mkdir client
 cd client
-
 git clone https://github.com/victorgfz/webinars_catalog_server.git .
 npm install
 
-# Create a .env file and configure the environment variables
+Create a .env file and configure the environment variables
+
 DATABASE_URL=
 CORS_ORIGIN=
 JWT_SECRET=
 
 npx prisma generate
 npx prisma migrate dev
-
 npm run dev
 
 Architecture
