@@ -10,8 +10,8 @@ The objective was to build a Webinar Catalog Application where users can browse 
 Run the commands below in a Git Bash terminal:
 
 ```bash
-mkdir client
-cd client
+mkdir server
+cd server
 git clone https://github.com/victorgfz/webinars_catalog_server.git .
 npm install
 ```
